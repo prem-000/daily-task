@@ -1,6 +1,7 @@
 import { createServerClient as createSupabaseServerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Database } from '../types/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 // Helper to identify if environment variables are placeholders
 const isPlaceholder = (url?: string, key?: string) => {
@@ -78,5 +79,22 @@ export const createServerClient = async () => {
 
 export const createRouteClient = async () => {
   return await createServerClient();
+};
+
+export const createAdminClient = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceRoleKey || url.includes("your-project.supabase.co") || serviceRoleKey.includes("your-service-role-key")) {
+    console.warn("⚠️ [StudyFlow] Supabase Admin client is using mocked behavior (missing credentials).");
+    return null;
+  }
+
+  return createClient<any>(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 };
 

@@ -4,6 +4,7 @@ import { RegisterSchema } from "@/lib/validation";
 import { hashPassword } from "@/lib/hash";
 import { signJWT, setAuthCookie } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { createAdminClient } from "@/lib/supabase-server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,6 +63,40 @@ export async function POST(request: NextRequest) {
         isVerified: false,
       }
     });
+
+    // 5b. Sync with Supabase Auth
+    try {
+      const supabaseAdmin = createAdminClient();
+      if (supabaseAdmin) {
+        const { error: supabaseError } = await supabaseAdmin.auth.admin.createUser({
+          email: email,
+          password: password,
+          email_confirm: true,
+          user_metadata: {
+            fullName,
+            username,
+          }
+        });
+
+        if (supabaseError) {
+          console.error("Supabase Auth registration failed:", supabaseError);
+          // Rollback local user creation to keep DBs in sync
+          await prisma.user.delete({ where: { id: user.id } });
+          return NextResponse.json(
+            { error: supabaseError.message || "Supabase registration failed" },
+            { status: 400 }
+          );
+        }
+      }
+    } catch (err: any) {
+      console.error("Supabase Auth sync unexpected exception:", err);
+      // Rollback local user creation
+      await prisma.user.delete({ where: { id: user.id } });
+      return NextResponse.json(
+        { error: "Failed to synchronize credentials. Registration rolled back." },
+        { status: 500 }
+      );
+    }
 
     // 6. Sign session token & Set Secure HTTP-only Cookie
     const sessionPayload = {

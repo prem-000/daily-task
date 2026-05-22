@@ -4,6 +4,7 @@ import { LoginSchema } from "@/lib/validation";
 import { comparePassword } from "@/lib/hash";
 import { signJWT, setAuthCookie } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { createAdminClient } from "@/lib/supabase-server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,6 +50,37 @@ export async function POST(request: NextRequest) {
 
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Invalid email/username or password" }, { status: 401 });
+    }
+
+    // 4b. Sync legacy/existing user to Supabase Auth on-demand if missing
+    try {
+      const supabaseAdmin = createAdminClient();
+      if (supabaseAdmin) {
+        // Attempt to create user in Supabase.
+        // If the user already exists, it will fail with an "already exists" / conflict error,
+        // which we can safely ignore since they are already synchronized.
+        const { error: supabaseError } = await supabaseAdmin.auth.admin.createUser({
+          email: user.email,
+          password: password, // use the plain text password provided in login attempt
+          email_confirm: true,
+          user_metadata: {
+            fullName: user.fullName,
+            username: user.username,
+          }
+        });
+
+        if (supabaseError) {
+          const errMsg = supabaseError.message.toLowerCase();
+          const isConflict = errMsg.includes("already exists") || errMsg.includes("conflict") || errMsg.includes("email_exists");
+          if (!isConflict) {
+            console.warn("Supabase Auth legacy sync warning:", supabaseError.message);
+          }
+        } else {
+          console.log(`On-demand synchronized legacy user ${user.email} to Supabase Auth.`);
+        }
+      }
+    } catch (err: any) {
+      console.warn("Supabase Auth legacy sync exception:", err?.message || err);
     }
 
     // 5. Sign session token & Set secure HTTP-only Cookie
