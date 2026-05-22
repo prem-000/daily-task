@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
@@ -11,7 +11,6 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase";
-import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 function LoginForm() {
   const router = useRouter();
@@ -241,30 +240,72 @@ function LoginFormFallback() {
 }
 
 export default function LoginPage() {
-  const { isInstallable, triggerInstall } = usePWAInstall();
   const { showToast } = useToast();
   const [showInstallerGuide, setShowInstallerGuide] = useState(false);
   const [installerTab, setInstallerTab] = useState<"ios" | "android" | "desktop">("ios");
   const [installingApp, setInstallingApp] = useState(false);
 
-  // Dynamic Desktop Shortcut downloader (.url format for Windows/macOS web app)
-  const downloadDesktopShortcut = () => {
+  // PWA Native Installer States
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    // Check if window object exists and custom prompt is already caught
+    if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+      setCanInstall(true);
+    }
+
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setCanInstall(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Listen for custom event in case layout script fired
+    const customHandler = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        setDeferredPrompt(customEvent.detail);
+        setCanInstall(true);
+      }
+    };
+    window.addEventListener('pwa-prompt-available', customHandler as EventListener);
+
+    // Listen for successful install
+    const installedHandler = () => {
+      setCanInstall(false);
+      setDeferredPrompt(null);
+      if ((window as any).deferredPrompt) {
+        (window as any).deferredPrompt = null;
+      }
+    };
+    window.addEventListener('appinstalled', installedHandler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('pwa-prompt-available', customHandler as EventListener);
+      window.removeEventListener('appinstalled', installedHandler);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    setInstallingApp(true);
     try {
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://studyflow.vercel.app';
-      const urlContent = `[InternetShortcut]\r\nURL=${origin}/dashboard\r\nIconIndex=0\r\nIconFile=${origin}/favicon.ico\r\n`;
-      const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = 'StudyFlow.url';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
-      showToast('Desktop shortcut downloaded! 🖥️', 'success');
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setCanInstall(false);
+        showToast('App installed successfully! 🎉', 'success');
+      }
+      setDeferredPrompt(null);
     } catch (err) {
-      console.error('Shortcut download failed:', err);
-      showToast('Download failed. Try again.', 'error');
+      console.error('Install failed:', err);
+    } finally {
+      setInstallingApp(false);
     }
   };
 
@@ -278,45 +319,59 @@ export default function LoginPage() {
       <div className="w-full max-w-md z-10 flex flex-col">
         {/* PWA Download Banner Alert */}
         <div className="mb-6 w-full animate-in fade-in slide-in-from-top-4 duration-500">
-          <div 
-            onClick={async () => {
-              if (isInstallable) {
-                setInstallingApp(true);
-                try {
-                  const accepted = await triggerInstall();
-                  if (accepted) showToast('App installed! 🎉', 'success');
-                } finally {
-                  setInstallingApp(false);
-                }
-              } else {
-                setShowInstallerGuide(true);
-              }
-            }}
-            className="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/5 to-transparent border border-emerald-500/25 hover:border-emerald-500/40 hover:bg-emerald-500/20 transition-all duration-300 cursor-pointer shadow-lg shadow-emerald-950/20 backdrop-blur-sm"
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative flex h-2.5 w-2.5 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </div>
-              <div className="flex items-center gap-2 text-left">
-                <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
-                    StudyFlow App is Available!
-                  </p>
-                  <p className="text-[10px] text-white/50 mt-0.5">
-                    Click to install on iOS, Android, or PC instantly
-                  </p>
+          {canInstall ? (
+            <div 
+              onClick={handleInstall}
+              className="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/5 to-transparent border border-emerald-500/25 hover:border-emerald-500/40 hover:bg-emerald-500/20 transition-all duration-300 cursor-pointer shadow-lg shadow-emerald-950/20 backdrop-blur-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </div>
+                <div className="flex items-center gap-2 text-left">
+                  <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
+                      StudyFlow App is Available!
+                    </p>
+                    <p className="text-[10px] text-white/50 mt-0.5">
+                      Click to install on this device instantly
+                    </p>
+                  </div>
                 </div>
               </div>
+              
+              <div className="flex items-center gap-1 text-[11px] font-bold text-[#00D4AA] group-hover:translate-x-0.5 transition-transform shrink-0">
+                <span>{installingApp ? "Installing..." : "Install App"}</span>
+                <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
+              </div>
             </div>
-            
-            <div className="flex items-center gap-1 text-[11px] font-bold text-[#00D4AA] group-hover:translate-x-0.5 transition-transform shrink-0">
-              <span>{isInstallable ? "Install App" : "Install Guide"}</span>
-              <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
+          ) : (
+            <div 
+              onClick={() => setShowInstallerGuide(true)}
+              className="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-300 cursor-pointer shadow-lg backdrop-blur-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 text-left">
+                  <Smartphone className="h-4 w-4 text-white/40 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-white/60">
+                      Already installed or use browser menu
+                    </p>
+                    <p className="text-[10px] text-white/30 mt-0.5">
+                      Tap here to open the step-by-step install guide
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-1 text-[11px] font-bold text-white/40 group-hover:translate-x-0.5 transition-transform shrink-0">
+                <span>Install Guide</span>
+                <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Brand header */}
@@ -474,20 +529,6 @@ export default function LoginPage() {
                     <p className="text-xs text-white/80 leading-relaxed">
                       Click the icon and select <span className="text-[#00D4AA] font-bold">Install</span> to launch StudyFlow as a standalone app.
                     </p>
-                  </div>
-                  <div className="border-t border-white/5 pt-3 mt-1 flex flex-col gap-2">
-                    <p className="text-[10px] text-white/40">Alternative: Download a custom desktop file shortcut directly to your computer:</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        downloadDesktopShortcut();
-                        setShowInstallerGuide(false);
-                      }}
-                      className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-white/90 hover:text-white cursor-pointer"
-                    >
-                      <Download className="h-3.5 w-3.5" />
-                      Download Desktop Shortcut Launcher
-                    </button>
                   </div>
                 </div>
               )}

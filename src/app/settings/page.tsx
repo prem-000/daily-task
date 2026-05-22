@@ -5,9 +5,8 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 import { createClient } from "@/lib/supabase";
 import { useAuth } from "@/components/ui/auth-provider";
 import { useToast } from "@/components/ui/toast";
-import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { 
-  Bell, Palette, LogOut, Check, Loader2, Save, Moon, Sun, Info, Smartphone, Download, CheckCircle2,
+  Bell, Palette, LogOut, Check, Loader2, Save, Moon, Sun, Info, Smartphone, CheckCircle2,
   X, Laptop, Monitor, Sparkles, HelpCircle, ChevronRight, Apple
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -15,33 +14,71 @@ import { useRouter } from "next/navigation";
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
-  const { isInstallable, isInstalled, triggerInstall } = usePWAInstall();
   const supabase = createClient();
   const router = useRouter();
   const [installingApp, setInstallingApp] = useState(false);
 
-  // PWA Installer Guide States
-  const [showInstallerGuide, setShowInstallerGuide] = useState(false);
-  const [installerTab, setInstallerTab] = useState<"ios" | "android" | "desktop">("ios");
+  // PWA Native Installer States
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [canInstall, setCanInstall] = useState(false);
 
-  // Dynamic Desktop Shortcut downloader (.url format for Windows/macOS web app)
-  const downloadDesktopShortcut = () => {
+  useEffect(() => {
+    // Check if window object exists and custom prompt is already caught
+    if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+      setCanInstall(true);
+    }
+
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setCanInstall(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Listen for custom event in case layout script fired
+    const customHandler = (e: Event) => {
+      const customEvent = e as CustomEvent
+      if (customEvent.detail) {
+        setDeferredPrompt(customEvent.detail)
+        setCanInstall(true)
+      }
+    }
+    window.addEventListener('pwa-prompt-available', customHandler as EventListener)
+
+    // Listen for successful install
+    const installedHandler = () => {
+      setCanInstall(false);
+      setDeferredPrompt(null);
+      if ((window as any).deferredPrompt) {
+        (window as any).deferredPrompt = null;
+      }
+    };
+    window.addEventListener('appinstalled', installedHandler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('pwa-prompt-available', customHandler as EventListener);
+      window.removeEventListener('appinstalled', installedHandler);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    setInstallingApp(true);
     try {
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://studyflow.vercel.app';
-      const urlContent = `[InternetShortcut]\r\nURL=${origin}/dashboard\r\nIconIndex=0\r\nIconFile=${origin}/favicon.ico\r\n`;
-      const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = 'StudyFlow.url';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
-      showToast('Desktop shortcut downloaded! 🖥️', 'success');
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setCanInstall(false);
+        showToast('App installed successfully! 🎉', 'success');
+      }
+      setDeferredPrompt(null);
     } catch (err) {
-      console.error('Shortcut download failed:', err);
-      showToast('Download failed. Try again.', 'error');
+      console.error('Install failed:', err);
+    } finally {
+      setInstallingApp(false);
     }
   };
 
@@ -297,61 +334,20 @@ export default function SettingsPage() {
               <Smartphone className="h-4 w-4 text-[#00D4AA]" /> App Installation
             </h3>
 
-            {isInstalled ? (
-              /* Already installed */
-              <div className="flex flex-col gap-3.5">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                  <div>
-                    <h4 className="text-xs font-bold text-white">StudyFlow is installed</h4>
-                    <p className="text-[10px] text-white/40 mt-0.5">You&apos;re using the installed app version</p>
-                  </div>
-                  <span className="ml-auto text-[9px] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 px-2.5 py-1 rounded-full uppercase tracking-wider whitespace-nowrap">
-                    ✓ Installed
-                  </span>
-                </div>
-
-                <div className="border-t border-white/5 pt-3">
-                  <p className="text-[10px] text-white/40 mb-2 leading-relaxed">
-                    Want to add a direct launcher shortcut to your desktop?
-                  </p>
-                  <button
-                    type="button"
-                    onClick={downloadDesktopShortcut}
-                    className="w-full h-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-extrabold text-[11px] tracking-wider uppercase rounded-xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer shadow-lg"
-                  >
-                    <Download className="h-4 w-4 stroke-[2.5]" />
-                    Download Web Shortcut File
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Not installed / Installable options */
-              <div className="flex flex-col gap-3.5">
+            {canInstall ? (
+              /* Installable options */
+              <div className="flex flex-col gap-3.5 animate-in fade-in duration-200">
                 <div>
-                  <h4 className="text-xs font-bold text-white">Download & Install StudyFlow App</h4>
+                  <h4 className="text-xs font-bold text-white">Install StudyFlow on your device</h4>
                   <p className="text-[10px] text-white/40 mt-1 leading-relaxed">
-                    StudyFlow is a progressive web app. Instead of a heavy installer file, you can install it instantly through your browser as a lightweight standalone application.
+                    Gain quick access from your home screen, support offline use, and enjoy automated task updates.
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-2.5">
                   <button
                     id="settings-install-btn"
-                    onClick={async () => {
-                      if (isInstallable) {
-                        setInstallingApp(true)
-                        try {
-                          const accepted = await triggerInstall()
-                          if (accepted) showToast('App installed! 🎉', 'success')
-                        } finally {
-                          setInstallingApp(false)
-                        }
-                      } else {
-                        // Open the gorgeous step-by-step installer guide
-                        setShowInstallerGuide(true)
-                      }
-                    }}
+                    onClick={handleInstall}
                     disabled={installingApp}
                     className="w-full h-12 bg-gradient-to-r from-[#00D4AA] to-emerald-500 text-black font-extrabold text-xs tracking-wider uppercase rounded-2xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-[#00D4AA]/10"
                   >
@@ -360,21 +356,20 @@ export default function SettingsPage() {
                     ) : (
                       <Smartphone className="h-4 w-4 stroke-[2.5]" />
                     )}
-                    {isInstallable ? "Install App Directly" : "How to Install App (Guide)"}
+                    Install StudyFlow App
                   </button>
-
-                  <div className="border-t border-white/5 pt-3 mt-1">
-                    <p className="text-[10px] text-white/40 mb-2 leading-relaxed">
-                      Alternative: Download a desktop shortcut launcher instead:
+                </div>
+              </div>
+            ) : (
+              /* Not installable / Already installed */
+              <div className="flex flex-col gap-3.5 animate-in fade-in duration-200">
+                <div className="flex items-center gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                  <div>
+                    <h4 className="text-xs font-bold text-white">Already installed or use browser menu</h4>
+                    <p className="text-[10px] text-white/40 mt-1 leading-relaxed">
+                      If StudyFlow is not yet installed on this device, you can install it using your browser's menu option (e.g., tap the three vertical dots in Chrome or the Share button in Safari, then select &ldquo;Install app&rdquo; or &ldquo;Add to Home Screen&rdquo;).
                     </p>
-                    <button
-                      type="button"
-                      onClick={downloadDesktopShortcut}
-                      className="w-full h-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-extrabold text-[11px] tracking-wider uppercase rounded-xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer shadow-md"
-                    >
-                      <Download className="h-4 w-4 stroke-[2.5]" />
-                      Download Web Shortcut File
-                    </button>
                   </div>
                 </div>
               </div>
@@ -410,160 +405,6 @@ export default function SettingsPage() {
           </div>
         </footer>
 
-        {/* PWA Installer Guide Modal */}
-        {showInstallerGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md overflow-hidden glass-modal rounded-3xl p-6 shadow-2xl border border-white/10 flex flex-col gap-5 animate-in zoom-in-95 duration-200">
-              {/* Modal Close Button */}
-              <button 
-                onClick={() => setShowInstallerGuide(false)}
-                className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white/60 hover:text-white transition-all cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              {/* Header */}
-              <div>
-                <div className="flex items-center gap-2 text-[#00D4AA] text-xs font-bold uppercase tracking-wider mb-1">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Platform Installer Guide
-                </div>
-                <h3 className="text-lg font-bold text-white">How to Install StudyFlow</h3>
-                <p className="text-[11px] text-white/40">Add the app directly to your home screen or desktop launcher.</p>
-              </div>
-
-              {/* Platform Tabs */}
-              <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5">
-                {(["ios", "android", "desktop"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setInstallerTab(tab)}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      installerTab === tab
-                        ? "bg-[#00D4AA] text-black shadow-md shadow-[#00D4AA]/10"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    {tab === "ios" && <Apple className="h-3.5 w-3.5" />}
-                    {tab === "android" && <Smartphone className="h-3.5 w-3.5" />}
-                    {tab === "desktop" && <Monitor className="h-3.5 w-3.5" />}
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              {/* Tab Contents */}
-              <div className="flex flex-col gap-4 min-h-[220px] py-1">
-                {installerTab === "ios" && (
-                  <div className="flex flex-col gap-3.5 animate-in fade-in duration-200">
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">1</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Open <span className="text-[#00D4AA] font-bold">Safari</span> and navigate to <span className="font-mono text-white/60">studyflow.app</span>
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">2</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Tap the <span className="bg-white/10 px-2 py-0.5 rounded border border-white/15 text-white font-bold">Share</span> button in Safari&apos;s bottom toolbar (the rectangle with an arrow pointing up).
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">3</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Scroll down the action sheet and select <span className="text-[#00D4AA] font-bold">&ldquo;Add to Home Screen&rdquo;</span>.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">4</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Name it <span className="font-bold text-white">StudyFlow</span> and tap <span className="text-[#00D4AA] font-bold">Add</span> in the top-right corner.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {installerTab === "android" && (
-                  <div className="flex flex-col gap-3.5 animate-in fade-in duration-200">
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">1</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Open <span className="text-[#00D4AA] font-bold">Google Chrome</span> on your Android device.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">2</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Tap the <span className="bg-white/10 px-2 py-0.5 rounded border border-white/15 text-white font-bold">Menu</span> icon (three vertical dots) in the top-right corner.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">3</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Select <span className="text-[#00D4AA] font-bold">&ldquo;Install app&rdquo;</span> or <span className="text-[#00D4AA] font-bold">&ldquo;Add to Home screen&rdquo;</span>.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">4</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Confirm the prompt by tapping <span className="text-[#00D4AA] font-bold">Install</span>.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {installerTab === "desktop" && (
-                  <div className="flex flex-col gap-3.5 animate-in fade-in duration-200">
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">1</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Use <span className="text-[#00D4AA] font-bold">Chrome</span>, <span className="text-[#00D4AA] font-bold">Edge</span>, or <span className="text-[#00D4AA] font-bold">Brave</span> on your PC or Mac.
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">2</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Look at the right side of the address bar for the <span className="text-[#00D4AA] font-bold">Install</span> icon (looks like a monitor with a down arrow, or a small overlapping square/plus symbol).
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="flex items-center justify-center h-6 w-6 shrink-0 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-xs font-bold">3</span>
-                      <p className="text-xs text-white/80 leading-relaxed">
-                        Click the icon and select <span className="text-[#00D4AA] font-bold">Install</span> to create a launchable standalone window.
-                      </p>
-                    </div>
-                    <div className="border-t border-white/5 pt-3 mt-1 flex flex-col gap-2">
-                      <p className="text-[10px] text-white/40">Alternative: Download a custom desktop file shortcut directly to your computer:</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          downloadDesktopShortcut();
-                          setShowInstallerGuide(false);
-                        }}
-                        className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-white/90 hover:text-white cursor-pointer"
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        Download Windows Desktop Shortcut
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="flex justify-end pt-2 border-t border-white/5">
-                <button
-                  type="button"
-                  onClick={() => setShowInstallerGuide(false)}
-                  className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all text-white/60 hover:text-white cursor-pointer"
-                >
-                  Got it
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </NavigationWrapper>
   );
