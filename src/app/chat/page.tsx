@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import NavigationWrapper from "@/components/NavigationWrapper";
 import { createClient } from "@/lib/supabase";
 import { useAuth } from "@/components/ui/auth-provider";
 import { useToast } from "@/components/ui/toast";
 import { 
-  Send, Sparkles, AlertCircle, Calendar, Clock, Check, Plus, Loader2 
+  Send, Sparkles, AlertCircle, Calendar, Clock, Check, Plus, Loader2, ArrowLeft 
 } from "lucide-react";
 
 interface ChatMessage {
@@ -254,10 +255,16 @@ export default function ChatPage() {
 
   return (
     <NavigationWrapper>
-      <div className="flex flex-col h-screen bg-[#0A0F1E] relative">
+      <div className="flex flex-col h-screen bg-[#0A0F1E] relative overflow-hidden">
         {/* Top Header */}
         <header className="p-4 md:p-6 border-b border-white/5 bg-black/10 backdrop-blur-md flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
+            <Link 
+              href="/dashboard" 
+              className="md:hidden p-2 -ml-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-all"
+            >
+              <ArrowLeft size={16} />
+            </Link>
             <div className="p-2.5 rounded-xl bg-gradient-to-tr from-[#00D4AA]/30 to-[#00D4AA] shadow-md shadow-[#00D4AA]/10">
               <Sparkles size={18} className="text-black" />
             </div>
@@ -269,7 +276,7 @@ export default function ChatPage() {
         </header>
 
         {/* Message Panel */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 pb-[104px] md:pb-[120px]">
           {messages.length === 0 && !loading ? (
             <div className="h-full flex flex-col justify-center items-center text-center max-w-sm mx-auto px-4">
               <div className="p-4 rounded-3xl bg-white/[0.02] border border-white/5 mb-6">
@@ -393,13 +400,13 @@ export default function ChatPage() {
         </main>
 
         {/* Input box */}
-        <div className="p-4 md:p-6 border-t border-white/5 bg-black/10 backdrop-blur-md z-10">
+        <div className="absolute bottom-0 left-0 right-0 p-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] md:p-6 bg-[#0A0F1E]/80 backdrop-blur-md border-t border-white/5 z-20">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage(inputValue);
             }}
-            className="flex items-center gap-3 max-w-2xl mx-auto"
+            className="flex items-center gap-3 max-w-2xl mx-auto w-full"
           >
             <input
               type="text"
@@ -407,13 +414,13 @@ export default function ChatPage() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="e.g. Schedule Math homework due Friday at 2 PM..."
-              className="flex-1 px-5 py-4 rounded-2xl bg-white/[0.02] border border-white/10 text-sm text-white placeholder-white/30 focus:border-[#00D4AA] focus:outline-none transition-all disabled:opacity-50"
+              className="flex-1 h-14 px-5 rounded-2xl bg-white/[0.02] border border-white/10 text-sm text-white placeholder-white/30 focus:border-[#00D4AA] focus:outline-none transition-all disabled:opacity-50"
             />
             
             <button
               type="submit"
               disabled={loading || !inputValue.trim()}
-              className="p-4 rounded-2xl bg-gradient-to-tr from-[#00D4AA] to-emerald-500 text-black hover:scale-105 transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+              className="h-14 w-14 shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-[#00D4AA] to-emerald-500 text-black hover:scale-105 transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
             >
               <Send size={18} strokeWidth={2.5} />
             </button>

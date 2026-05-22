@@ -116,9 +116,9 @@ export default function CalendarGrid({ initialYear, initialMonth, tasks, onDayCl
     
     if (todayCheck) {
       return {
-        bg: 'rgba(59, 130, 246, 0.1)',
-        border: '2px solid #3B82F6',
-        shadow: '0 0 24px rgba(59, 130, 246, 0.5)',
+        bg: 'rgba(0, 212, 170, 0.1)',
+        border: '2px solid #00D4AA',
+        shadow: '0 0 24px rgba(0, 212, 170, 0.5)',
         animation: '',
       };
     }
@@ -132,7 +132,7 @@ export default function CalendarGrid({ initialYear, initialMonth, tasks, onDayCl
   };
 
   return (
-    <div className="bg-[rgba(20,30,48,0.72)] backdrop-blur-[24px] border border-white/8 rounded-[24px] p-4 glass-card w-full max-w-sm mx-auto shadow-2xl">
+    <div className="bg-[rgba(20,30,48,0.72)] backdrop-blur-[24px] border border-white/8 rounded-[24px] p-4 glass-card w-full max-w-sm mx-auto shadow-2xl overflow-y-auto">
       {/* Month Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button 
@@ -153,18 +153,18 @@ export default function CalendarGrid({ initialYear, initialMonth, tasks, onDayCl
       </div>
 
       {/* Day Labels */}
-      <div className="grid grid-cols-7 gap-2 mb-2">
+      <div className="grid grid-cols-7 gap-2 mb-2 min-w-0">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-          <div key={i} className="text-center text-xs font-semibold text-white/50">
+          <div key={i} className="text-center text-xs font-semibold text-white/50 truncate">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Days - Circular Floating Style */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-2 min-w-0">
         {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-          <div key={`empty-${i}`} />
+          <div key={`empty-${i}`} className="w-full aspect-square min-w-0" />
         ))}
 
         {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -178,13 +178,13 @@ export default function CalendarGrid({ initialYear, initialMonth, tasks, onDayCl
               key={day}
               onClick={() => onDayClick(date)}
               className={`
-                aspect-square rounded-full
+                w-full aspect-square rounded-full min-w-0
                 flex items-center justify-center
-                text-sm font-medium text-white
+                text-xs md:text-sm font-medium text-white
                 transition-all duration-300
-                hover:scale-110 active:scale-95
+                hover:scale-110 active:scale-95 z-10
                 ${style.animation}
-                ${todayCheck && style.border === 'none' ? 'ring-2 ring-blue-500' : ''}
+                ${todayCheck && style.border === 'none' ? 'ring-2 ring-[#00D4AA]' : ''}
               `}
               style={{
                 background: style.bg,
@@ -203,7 +203,7 @@ export default function CalendarGrid({ initialYear, initialMonth, tasks, onDayCl
         <LegendItem color="linear-gradient(135deg, #22C55E, #10B981)" label="All Done" />
         <LegendItem color="rgba(245, 158, 11, 0.2)" label="Partial" border="#F59E0B" />
         <LegendItem color="linear-gradient(135deg, #EF4444, #DC2626)" label="Missed" />
-        <LegendItem color="rgba(59, 130, 246, 0.1)" label="Today" border="#3B82F6" />
+        <LegendItem color="rgba(0, 212, 170, 0.1)" label="Today" border="#00D4AA" />
         <LegendItem color="rgba(255, 255, 255, 0.05)" label="No Tasks" />
       </div>
     </div>

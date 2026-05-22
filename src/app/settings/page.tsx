@@ -309,7 +309,7 @@ export default function SettingsPage() {
                   {installingApp
                     ? <Loader2 className="h-4 w-4 animate-spin" />
                     : <Download className="h-4 w-4 stroke-[2.5]" />}
-                  Download App
+                  Install App
                 </button>
               </div>
             ) : (

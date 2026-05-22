@@ -5,6 +5,7 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 import { createClient } from "@/lib/supabase";
 import { useAuth } from "@/components/ui/auth-provider";
 import { useToast } from "@/components/ui/toast";
+import { useRouter } from "next/navigation";
 import PartialReasonModal from "@/components/PartialReasonModal";
 import { 
   ChevronLeft, ChevronRight, Plus, X, Calendar as CalendarIcon, 
@@ -29,11 +30,40 @@ interface Task {
 export default function DashboardPage() {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const router = useRouter();
   const supabase = createClient();
+
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [supabaseSession, setSupabaseSession] = useState<any>(null);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Synchronize and verify client session with Supabase
+  useEffect(() => {
+    const verifySession = async () => {
+      try {
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const isMockEnv = !url || !anonKey || url.includes("your-project.supabase.co") || anonKey.includes("your-anon-key-here");
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if ((error || !session) && !isMockEnv) {
+          showToast("Access denied. Please log in first.", "error");
+          router.push("/login");
+        } else {
+          setSupabaseSession(session || { user: { email: "mock@example.com" } });
+          setSessionLoading(false);
+        }
+      } catch (err) {
+        console.error("Session verification failed:", err);
+        router.push("/login");
+      }
+    };
+    verifySession();
+  }, []);
 
   // Modal / Side Panel states
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -304,6 +334,93 @@ export default function DashboardPage() {
     low: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
   };
 
+  if (sessionLoading) {
+    return (
+      <NavigationWrapper>
+        <div className="p-4 md:p-8 flex flex-col gap-6 max-w-6xl w-full mx-auto relative min-h-screen animate-pulse">
+          {/* Header toolbar skeleton */}
+          <header className="flex justify-between items-center z-20">
+            <div>
+              <div className="h-8 w-48 bg-white/10 rounded-xl mb-2" />
+              <div className="h-3 w-36 bg-emerald-500/20 rounded-md" />
+            </div>
+          </header>
+
+          {/* Calendar Grid Container skeleton */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Main Grid skeleton */}
+            <div className="flex-1 bg-white/[0.02] border border-white/5 rounded-3xl p-4 md:p-6 backdrop-blur-xl">
+              {/* Month Navigation skeleton */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="h-7 w-40 bg-white/10 rounded-xl" />
+                <div className="flex items-center gap-2">
+                  <div className="h-9 w-9 bg-white/5 rounded-xl" />
+                  <div className="h-9 w-9 bg-white/5 rounded-xl" />
+                </div>
+              </div>
+
+              {/* Statistics strip skeleton */}
+              <div className="flex gap-4 p-3 bg-white/[0.03] border border-white/[0.04] rounded-2xl mb-6 justify-around">
+                <div className="h-4 w-16 bg-white/10 rounded-lg" />
+                <div className="h-4 w-16 bg-white/10 rounded-lg" />
+                <div className="h-4 w-16 bg-white/10 rounded-lg" />
+              </div>
+
+              {/* Day of week headers */}
+              <div className="grid grid-cols-7 gap-1 md:gap-1.5 mb-2 text-center">
+                {Array.from({ length: 7 }).map((_, idx) => (
+                  <div key={idx} className="flex justify-center py-2">
+                    <div className="h-3 w-8 bg-white/5 rounded" />
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar Cells 7x5 grid */}
+              <div className="grid grid-cols-7 gap-1.5 md:gap-2.5">
+                {Array.from({ length: 35 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="aspect-square w-[44px] h-[44px] md:w-[64px] md:h-[64px] bg-white/5 border border-white/[0.03] rounded-xl mx-auto"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Right Side Panel skeleton */}
+            <div className="w-full lg:w-96 flex flex-col gap-4 bg-white/[0.02] border border-white/5 rounded-3xl p-6 backdrop-blur-xl shrink-0">
+              <div className="border-b border-white/5 pb-4 space-y-2">
+                <div className="h-6 w-32 bg-white/10 rounded-lg" />
+                <div className="h-3.5 w-48 bg-white/5 rounded-md" />
+              </div>
+
+              {/* Task list container skeleton */}
+              <div className="flex-1 space-y-3 py-2">
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex flex-col gap-3"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="h-4.5 w-14 bg-white/10 rounded-full" />
+                      <div className="h-4.5 w-20 bg-white/10 rounded-full" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="h-4.5 w-3/4 bg-white/10 rounded" />
+                      <div className="h-3.5 w-5/6 bg-white/5 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add Task Button skeleton */}
+              <div className="h-10 w-full bg-white/10 rounded-2xl" />
+            </div>
+          </div>
+        </div>
+      </NavigationWrapper>
+    );
+  }
+
   return (
     <NavigationWrapper>
       <div className="p-4 md:p-8 flex flex-col gap-6 max-w-6xl w-full mx-auto relative min-h-screen">
@@ -322,7 +439,7 @@ export default function DashboardPage() {
         {/* Calendar Grid Container */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Grid */}
-          <div className="flex-1 bg-white/[0.02] border border-white/5 rounded-3xl p-4 md:p-6 backdrop-blur-xl">
+          <div className="flex-1 bg-white/[0.02] border border-white/5 rounded-3xl p-4 md:p-6 backdrop-blur-xl overflow-y-auto">
             {/* Month & Arrow Navigation */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
@@ -360,19 +477,19 @@ export default function DashboardPage() {
             </div>
 
             {/* Day of week headers */}
-            <div className="grid grid-cols-7 gap-1 md:gap-1.5 mb-2 text-center text-xs font-semibold text-white/40">
+            <div className="grid grid-cols-7 gap-1 md:gap-1.5 mb-2 text-center text-xs font-semibold text-white/40 min-w-0">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                <div key={d} className="py-2">
+                <div key={d} className="py-2 truncate">
                   {d}
                 </div>
               ))}
             </div>
 
             {/* Calendar Cells */}
-            <div className="grid grid-cols-7 gap-1.5 md:gap-2.5">
+            <div className="grid grid-cols-7 gap-1.5 md:gap-2.5 min-w-0">
               {/* Empty offsets */}
               {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
-                <div key={`offset-${idx}`} className="aspect-square" />
+                <div key={`offset-${idx}`} className="w-full aspect-square min-w-0" />
               ))}
 
               {/* Day cells */}
@@ -397,11 +514,10 @@ export default function DashboardPage() {
                       setSelectedDate(cellDate);
                       setIsPanelOpen(true);
                     }}
-                    className={`aspect-square relative flex items-center justify-center font-bold transition-all rounded-xl cursor-pointer
-                      w-[44px] h-[44px] gap-1 text-sm
-                      md:w-[64px] md:h-[64px] md:text-base
+                    className={`w-full aspect-square relative flex items-center justify-center font-bold transition-all rounded-xl cursor-pointer min-w-0 gap-1
+                      text-xs md:text-sm
                       ${statusColors[status]}
-                      ${todayCheck ? "ring-2 ring-[#00D4AA] ring-offset-2 ring-offset-[#0A0F1E]" : ""}
+                      ${todayCheck ? "ring-2 ring-[#00D4AA] ring-offset-2 ring-offset-[#0A0F1E] z-10" : ""}
                     `}
                   >
                     <span>{dayNum}</span>

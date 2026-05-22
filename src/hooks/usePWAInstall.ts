@@ -19,6 +19,12 @@ export const usePWAInstall = () => {
       return
     }
 
+    // Check if we captured the event globally already
+    if ((window as any).deferredPrompt) {
+      setInstallPrompt((window as any).deferredPrompt)
+      setIsInstallable(true)
+    }
+
     const handler = (e: Event) => {
       e.preventDefault()
       setInstallPrompt(e as BeforeInstallPromptEvent)
@@ -27,28 +33,46 @@ export const usePWAInstall = () => {
 
     window.addEventListener('beforeinstallprompt', handler)
 
+    // Listen for custom event in case layout script fired
+    const customHandler = (e: Event) => {
+      const customEvent = e as CustomEvent
+      if (customEvent.detail) {
+        setInstallPrompt(customEvent.detail)
+        setIsInstallable(true)
+      }
+    }
+    window.addEventListener('pwa-prompt-available', customHandler as EventListener)
+
     // Listen for successful install
     const installedHandler = () => {
       setIsInstalled(true)
       setIsInstallable(false)
       setInstallPrompt(null)
+      if ((window as any).deferredPrompt) {
+        (window as any).deferredPrompt = null
+      }
     }
     window.addEventListener('appinstalled', installedHandler)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener('pwa-prompt-available', customHandler as EventListener)
       window.removeEventListener('appinstalled', installedHandler)
     }
   }, [])
 
   const triggerInstall = async (): Promise<boolean> => {
-    if (!installPrompt) return false
-    await installPrompt.prompt()
-    const { outcome } = await installPrompt.userChoice
+    const promptToUse = installPrompt || (window as any).deferredPrompt
+    if (!promptToUse) return false
+    await promptToUse.prompt()
+    const { outcome } = await promptToUse.userChoice
     if (outcome === 'accepted') {
       setIsInstalled(true)
       setIsInstallable(false)
       setInstallPrompt(null)
+      if ((window as any).deferredPrompt) {
+        (window as any).deferredPrompt = null
+      }
       return true
     }
     return false

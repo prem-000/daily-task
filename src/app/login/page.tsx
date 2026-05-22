@@ -7,12 +7,15 @@ import { Lock, Mail, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { createClient } from "@/lib/supabase";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
+  const supabase = createClient();
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const [formData, setFormData] = useState({
     identifier: "",
@@ -60,6 +63,7 @@ function LoginForm() {
     setLoading(true);
 
     try {
+      // 1. Authenticate with local Prisma API to set secure HTTP-only cookie
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,15 +86,29 @@ function LoginForm() {
         return;
       }
 
+      // 2. Authenticate with Supabase using standard email retrieved from local login response
+      if (typeof supabase.auth.signInWithPassword === "function") {
+        const { error: supabaseError } = await supabase.auth.signInWithPassword({
+          email: data.user.email,
+          password: formData.password,
+        });
+
+        if (supabaseError) {
+          console.error("Supabase authentication failed:", supabaseError.message);
+          showToast(supabaseError.message || "Supabase authentication failed", "error");
+          setLoading(false);
+          return;
+        }
+      }
+
       showToast("Signed in successfully!", "success");
+      setIsRedirecting(true);
 
       // Redirect either to callbackUrl (e.g. from middleware) or default to /dashboard
       const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-      setTimeout(() => {
-        router.push(callbackUrl);
-        router.refresh();
-      }, 1000);
+      router.push(callbackUrl);
+      router.refresh();
 
     } catch (error) {
       console.error("Client login error:", error);
@@ -98,6 +116,21 @@ function LoginForm() {
       setLoading(false);
     }
   };
+
+  if (isRedirecting) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in duration-300">
+        <div className="relative mb-6">
+          <div className="h-16 w-16 rounded-full border-4 border-purple-500/10 border-t-purple-500 animate-spin" />
+          <Loader2 className="absolute inset-0 m-auto h-6 w-6 text-purple-400 animate-pulse" />
+        </div>
+        <h3 className="text-lg font-bold text-white mb-2">Preparing your workspace</h3>
+        <p className="text-xs text-white/50 max-w-[250px] leading-relaxed">
+          Securing your session and redirecting you to your dashboard...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">

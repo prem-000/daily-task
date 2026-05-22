@@ -14,6 +14,7 @@ interface NavigationWrapperProps {
 export default function NavigationWrapper({ children }: NavigationWrapperProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const isChatPage = pathname === "/chat";
   const { user, loading, logout } = useAuth();
   const { showToast } = useToast();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -129,52 +130,54 @@ export default function NavigationWrapper({ children }: NavigationWrapperProps) 
       </aside>
 
       {/* Main content container */}
-      <main className="flex-1 flex flex-col min-w-0 z-10 overflow-y-auto max-h-screen pb-[80px] md:pb-0">
+      <main className={`flex-1 flex flex-col min-w-0 z-10 ${isChatPage ? "h-screen max-h-screen overflow-hidden pb-0" : "overflow-y-auto max-h-screen pb-[80px] md:pb-0"}`}>
         {children}
       </main>
 
       {/* Mobile Bottom Navigation Bar (< 768px) */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0 z-30 flex justify-around items-center md:hidden"
-        style={{
-          height: "calc(64px + env(safe-area-inset-bottom, 0px))",
-          background: "rgba(10,15,30,0.85)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)"
-        }}
-      >
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = pathname === tab.href;
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className="flex-1 flex flex-col items-center justify-center h-full relative"
-            >
-              <div 
-                className={`flex flex-col items-center justify-center transition-all duration-300 ${
-                  isActive ? "scale-115 text-[#00D4AA]" : "text-white/60"
-                }`}
+      {!isChatPage && (
+        <nav 
+          className="fixed bottom-0 left-0 right-0 z-30 flex justify-around items-center md:hidden"
+          style={{
+            height: "calc(64px + env(safe-area-inset-bottom, 0px))",
+            background: "rgba(10,15,30,0.85)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            paddingBottom: "env(safe-area-inset-bottom, 0px)"
+          }}
+        >
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = pathname === tab.href;
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className="flex-1 flex flex-col items-center justify-center h-full relative"
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-[#00D4AA]" : "text-white/60"}`} />
-                <span className="text-[10px] mt-1 font-medium">{tab.label}</span>
-              </div>
-              
-              {isActive && (
                 <div 
-                  className="absolute bottom-2.5 w-1 h-1 rounded-full bg-[#00D4AA]"
-                  style={{
-                    boxShadow: "0 0 8px rgba(0, 212, 170, 0.8)",
-                  }}
-                />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
+                  className={`flex flex-col items-center justify-center transition-all duration-300 ${
+                    isActive ? "scale-115 text-[#00D4AA]" : "text-white/60"
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 ${isActive ? "text-[#00D4AA]" : "text-white/60"}`} />
+                  <span className="text-[10px] mt-1 font-medium">{tab.label}</span>
+                </div>
+                
+                {isActive && (
+                  <div 
+                    className="absolute bottom-2.5 w-1 h-1 rounded-full bg-[#00D4AA]"
+                    style={{
+                      boxShadow: "0 0 8px rgba(0, 212, 170, 0.8)",
+                    }}
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }
