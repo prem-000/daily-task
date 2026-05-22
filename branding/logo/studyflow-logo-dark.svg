@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 128" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="primary-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+    <linearGradient id="glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <!-- Glowing Filters -->
+    <filter id="aurora-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur1" />
+      <feGaussianBlur stdDeviation="12" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <filter id="purple-text-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComponentTransfer in="blur" result="glow">
+        <feFuncA type="linear" slope="0.6"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="glow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Transparent Background for versatile overlay -->
+
+  <!-- ==================== LOGO ICON ==================== -->
+  <g transform="translate(32, 32)">
+    <!-- Glow Behind Icon -->
+    <g filter="url(#aurora-glow)" opacity="0.5">
+      <path d="M 32,8 C 33,8 54,17 55.5,18 C 57,19 57,21 55.5,22 C 54,23 33,32 32,32 C 31,32 10,23 8.5,22 C 7,21 7,19 8.5,18 C 10,17 31,8 32,8 Z" fill="none" stroke="url(#primary-grad)" stroke-width="4" />
+      <path d="M 12,40 Q 32,54 52,40" fill="none" stroke="#06B6D4" stroke-width="4" />
+      <path d="M 18,46 Q 32,58 46,46" fill="none" stroke="#A855F7" stroke-width="3" />
+    </g>
+
+    <!-- 1. Graduation Cap Diamond -->
+    <path d="M 32,8 C 33.5,8 54.5,16.5 56,17.5 C 57.5,18.5 57.5,20.5 56,21.5 C 54.5,22.5 33.5,31 32,31 C 30.5,31 9.5,22.5 8,21.5 C 6.5,20.5 6.5,18.5 8,17.5 C 9.5,16.5 30.5,8 32,8 Z" 
+          fill="url(#primary-grad)" />
+
+    <!-- 2. Neural Brain Lobes -->
+    <path d="M 20,23 C 14,26 12,38 21,43 C 24.5,44.8 28.5,41.5 30,37.5" fill="none" stroke="url(#glow-grad)" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M 44,23 C 50,26 52,38 43,43 C 39.5,44.8 35.5,41.5 34,37.5" fill="none" stroke="url(#glow-grad)" stroke-width="3.5" stroke-linecap="round" />
+
+    <!-- 3. Glowing AI Spark -->
+    <path d="M 32,14 Q 32,19.5 37.5,19.5 Q 32,19.5 32,25 Q 32,19.5 26.5,19.5 Q 32,19.5 32,14 Z" fill="#FFFFFF" filter="url(#aurora-glow)" />
+
+    <!-- 4. Flowing Motion Lines -->
+    <path d="M 12,40 Q 32,54 52,40" fill="none" stroke="#06B6D4" stroke-width="3" stroke-linecap="round" />
+    <path d="M 18,46 Q 32,58 46,46" fill="none" stroke="#A855F7" stroke-width="2.5" stroke-linecap="round" />
+          
+    <circle cx="12" cy="40" r="2.5" fill="#06B6D4" filter="url(#aurora-glow)" />
+    <circle cx="52" cy="40" r="2.5" fill="#3B82F6" filter="url(#aurora-glow)" />
+    <circle cx="32" cy="58" r="2" fill="#A855F7" filter="url(#aurora-glow)" />
+  </g>
+
+  <!-- ==================== BRAND TYPOGRAPHY ==================== -->
+  <!-- White Text with Soft Neon Purple/Blue Glow -->
+  <text x="116" y="76" 
+        font-family="'Inter', 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif" 
+        font-weight="800" 
+        font-size="44" 
+        letter-spacing="-0.03em" 
+        fill="#FFFFFF"
+        filter="url(#purple-text-glow)">StudyFlow</text>
+
+  <!-- AI Sparks next to text -->
+  <path d="M 345,46 Q 345,51 350,51 Q 345,51 345,56 Q 345,51 340,51 Q 345,51 345,46 Z" fill="#06B6D4" filter="url(#aurora-glow)" />
+  <path d="M 356,38 Q 356,41 359,41 Q 356,41 356,44 Q 356,41 353,41 Q 356,41 356,38 Z" fill="#A855F7" filter="url(#aurora-glow)" opacity="0.7" />
+</svg>

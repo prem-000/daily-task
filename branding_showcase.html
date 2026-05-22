@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyFlow — Visual Identity & Branding Showcase</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="./branding/favicon/favicon-32x32.png">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Aurora Palette Base theme */
+      --bg-main: #081120;
+      --bg-secondary: #0c182d;
+      --bg-card: rgba(20, 30, 48, 0.72);
+      --bg-frosted-border: rgba(255, 255, 255, 0.08);
+      
+      --gradient-primary: linear-gradient(135deg, #7C3AED, #3B82F6);
+      --gradient-accent: linear-gradient(135deg, #06B6D4, #A855F7);
+      
+      --text-primary: #FFFFFF;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
+      
+      --glow-blue: rgba(59, 130, 246, 0.4);
+      --glow-purple: rgba(124, 58, 237, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Ambient background shapes for Aurora Glow */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .aurora-shape {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.18;
+    }
+
+    .aurora-1 {
+      top: -10%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: #7C3AED;
+      animation: rotate-aurora 25s infinite linear;
+    }
+
+    .aurora-2 {
+      bottom: -10%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: #06B6D4;
+      animation: rotate-aurora 35s infinite linear reverse;
+    }
+
+    @keyframes rotate-aurora {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(5%, 5%) rotate(180deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    header {
+      padding: 60px var(--spacing-app, 24px) 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header-logo-container {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 12px 28px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+      animation: logo-entrance 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo-glow {
+      filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.6))
+              drop-shadow(0 0 40px rgba(59, 130, 246, 0.4));
+      transition: all 0.5s ease;
+      width: 64px;
+      height: 64px;
+    }
+
+    .logo-interactive:hover {
+      transform: scale(1.08) rotate(3deg);
+      filter: drop-shadow(0 0 30px rgba(124, 58, 237, 0.8))
+              drop-shadow(0 0 60px rgba(6, 182, 212, 0.6));
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 18px;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* Glass Cards Grid */
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin: 48px 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-left: 4px solid #7C3AED;
+      padding-left: 12px;
+    }
+
+    .grid-logo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--bg-frosted-border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent);
+      pointer-events: none;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 40px rgba(124, 58, 237, 0.15);
+    }
+
+    .card-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #A855F7;
+      margin-bottom: 20px;
+    }
+
+    .asset-viewer {
+      width: 100%;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #040914;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      margin-bottom: 20px;
+      padding: 24px;
+      position: relative;
+    }
+
+    .asset-viewer img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .asset-viewer.light-bg {
+      background: #F3F4F6;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .asset-info h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .asset-info p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .asset-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .meta-tag {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* Icon Set Grid */
+    .grid-icons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .icon-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--bg-frosted-border);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .icon-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .icon-viewer {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #040914;
+      border-radius: 24px;
+      padding: 12px;
+      position: relative;
+    }
+
+    .icon-viewer img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .icon-viewer.rounded-frame img {
+      border-radius: 22%;
+    }
+
+    /* Color Palette Section */
+    .color-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .color-card {
+      border-radius: 20px;
+      padding: 24px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--bg-frosted-border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .color-hex {
+      font-family: var(--font-mono, monospace);
+      font-weight: 700;
+      font-size: 18px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px 10px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    /* Micro animations details */
+    .logo-pulse {
+      animation: ai-pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes ai-pulse {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.4)); }
+      50% { filter: drop-shadow(0 0 30px rgba(124, 58, 237, 0.8)) drop-shadow(0 0 45px rgba(6, 182, 212, 0.5)); }
+    }
+
+    @keyframes logo-entrance {
+      0% { opacity: 0; transform: scale(0.85); filter: blur(10px); }
+      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+
+    /* Splash Screen Mockup Section */
+    .splash-mockup-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-mockup {
+      width: 320px;
+      height: 640px;
+      background: #040914;
+      border: 12px solid #1a202c;
+      border-radius: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(124, 58, 237, 0.2);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mobile-screen {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #0c182d 0%, #040914 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    .mobile-screen img {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 24px;
+    }
+
+    .mobile-screen h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .mobile-screen p {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.05em;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--bg-frosted-border);
+      padding: 40px var(--spacing-app, 24px);
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Aurora Glow -->
+  <div class="aurora-bg">
+    <div class="aurora-shape aurora-1"></div>
+    <div class="aurora-shape aurora-2"></div>
+  </div>
+
+  <header>
+    <div class="header-logo-container">
+      <img src="./branding/logo/studyflow-logo-dark.svg" alt="StudyFlow" class="logo-glow logo-interactive">
+      <span class="brand-title">StudyFlow</span>
+    </div>
+    <h1>Visual Identity Showcase</h1>
+    <p class="subtitle">Experience the premium, next-generation Aurora Glass UI brand system crafted for AI productivity.</p>
+  </header>
+
+  <main class="container">
+
+    <!-- 🎨 1. CORE LOGO SVGs -->
+    <h2 class="section-title">💡 Scalable Vector Logos (SVG)</h2>
+    <div class="grid-logo">
+      
+      <!-- Full Logo (Dark Navy) -->
+      <div class="glass-card">
+        <span class="card-badge">Full Branding</span>
+        <div class="asset-viewer">
+          <img src="./branding/logo/studyflow-logo-full.svg" alt="StudyFlow Logo Full">
+        </div>
+        <div class="asset-info">
+          <h3>Full Logo (Dark Navy)</h3>
+          <p>Full logo lockup with geometric brand icon and customized Inter typography on a deep navy background.</p>
+          <div class="asset-meta">
+            <span class="meta-tag">SVG</span>
+            <span class="meta-tag">512×128px</span>
+            <span class="meta-tag">Responsive</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dark Mode transparent -->
+      <div class="glass-card">
+        <span class="card-badge">Overlay Dark Mode</span>
+        <div class="asset-viewer" style="background: linear-gradient(135deg, #111827 0%, #030712 100%);">
+          <img src="./branding/logo/studyflow-logo-dark.svg" alt="StudyFlow Logo Dark">
+        </div>
+        <div class="asset-info">
+          <h3>Dark Theme (Transparent)</h3>
+          <p>White neon glowing typography, optimized for overlays on dark gradient layouts and product modules.</p>
+          <div class="asset-meta">
+            <span class="meta-tag">SVG</span>
+            <span class="meta-tag">Transparent</span>
+            <span class="meta-tag">Responsive</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Light Mode transparent -->
+      <div class="glass-card">
+        <span class="card-badge">Overlay Light Mode</span>
+        <div class="asset-viewer light-bg">
+          <img src="./branding/logo/studyflow-logo-light.svg" alt="StudyFlow Logo Light">
+        </div>
+        <div class="asset-info">
+          <h3>Light Theme (Transparent)</h3>
+          <p>Navy typography with subtle neon drop-shadows, optimized for bright content and documents.</p>
+          <div class="asset-meta">
+            <span class="meta-tag">SVG</span>
+            <span class="meta-tag">Transparent</span>
+            <span class="meta-tag">Responsive</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 📱 2. APP ICONS -->
+    <h2 class="section-title">📱 App & PWA Icons (PNG)</h2>
+    <div class="grid-icons">
+      
+      <!-- iOS App Store -->
+      <div class="icon-card">
+        <div class="icon-viewer">
+          <img src="./branding/icon/app-icon-ios.png" alt="iOS App Icon">
+        </div>
+        <h4>iOS App Icon</h4>
+        <p style="font-size:12px; color:var(--text-secondary); margin:8px 0 12px;">Solid navy, corner radius applied by iOS.</p>
+        <div class="asset-meta" style="justify-content:center;">
+          <span class="meta-tag">1024×1024</span>
+          <span class="meta-tag">PNG</span>
+        </div>
+      </div>
+
+      <!-- Android Rounded -->
+      <div class="icon-card">
+        <div class="icon-viewer rounded-frame">
+          <img src="./branding/icon/app-icon-rounded.png" alt="Android Rounded App Icon">
+        </div>
+        <h4>Android / Rounded</h4>
+        <p style="font-size:12px; color:var(--text-secondary); margin:8px 0 12px;">Pre-rounded mask with 22% iOS squircle frame.</p>
+        <div class="asset-meta" style="justify-content:center;">
+          <span class="meta-tag">512×512</span>
+          <span class="meta-tag">PNG</span>
+        </div>
+      </div>
+
+      <!-- PWA Transparent -->
+      <div class="icon-card">
+        <div class="icon-viewer" style="background:transparent; border:1px dashed rgba(255,255,255,0.15);">
+          <img src="./branding/icon/app-icon.png" alt="PWA App Icon">
+        </div>
+        <h4>PWA transparent</h4>
+        <p style="font-size:12px; color:var(--text-secondary); margin:8px 0 12px;">Transparent background emblem for overlays.</p>
+        <div class="asset-meta" style="justify-content:center;">
+          <span class="meta-tag">512×512</span>
+          <span class="meta-tag">PNG</span>
+        </div>
+      </div>
+
+      <!-- Favicon -->
+      <div class="icon-card">
+        <div class="icon-viewer" style="background:#040914;">
+          <img src="./branding/favicon/favicon-32x32.png" alt="Favicon" style="width:32px; height:32px;">
+        </div>
+        <h4>Favicon (Tab)</h4>
+        <p style="font-size:12px; color:var(--text-secondary); margin:8px 0 12px;">Simplified "SF" monogram optimized for 16/32px.</p>
+        <div class="asset-meta" style="justify-content:center;">
+          <span class="meta-tag">32×32</span>
+          <span class="meta-tag">ICO/PNG</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 🎨 3. BRAND COLOR SYSTEM -->
+    <h2 class="section-title">🌈 Brand Palette & Gradients</h2>
+    <div class="color-row">
+      
+      <!-- Primary Purple -->
+      <div class="color-card" style="background: linear-gradient(135deg, #7C3AED, #5b21b6); color: white;">
+        <div>
+          <h4 style="font-size:20px; font-weight:700; margin-bottom:4px;">Primary Purple</h4>
+          <p style="opacity:0.8; font-size:14px;">Futuristic neon violet brand center.</p>
+        </div>
+        <span class="color-hex">#7C3AED</span>
+      </div>
+
+      <!-- Primary Blue -->
+      <div class="color-card" style="background: linear-gradient(135deg, #3B82F6, #1d4ed8); color: white;">
+        <div>
+          <h4 style="font-size:20px; font-weight:700; margin-bottom:4px;">Primary Blue</h4>
+          <p style="opacity:0.8; font-size:14px;">Trustworthy neon blue productivity tone.</p>
+        </div>
+        <span class="color-hex">#3B82F6</span>
+      </div>
+
+      <!-- Cyan Accent -->
+      <div class="color-card" style="background: linear-gradient(135deg, #06B6D4, #0891b2); color: white;">
+        <div>
+          <h4 style="font-size:20px; font-weight:700; margin-bottom:4px;">Accent Cyan</h4>
+          <p style="opacity:0.8; font-size:14px;">Vibrant cyber glow highlight.</p>
+        </div>
+        <span class="color-hex">#06B6D4</span>
+      </div>
+
+      <!-- Deep Navy Background -->
+      <div class="color-card" style="background: #081120; border: 1px solid rgba(255,255,255,0.1); color: white;">
+        <div>
+          <h4 style="font-size:20px; font-weight:700; margin-bottom:4px;">Deep Navy</h4>
+          <p style="opacity:0.8; font-size:14px;">Solid base foundation background theme.</p>
+        </div>
+        <span class="color-hex">#081120</span>
+      </div>
+
+    </div>
+
+    <!-- 🖼️ 4. SPLASH SCREENS & MARKETING -->
+    <h2 class="section-title">🖼️ Splash Screen & Social Cards</h2>
+    <div class="grid-logo" style="margin-bottom:40px;">
+      
+      <!-- Social og-image -->
+      <div class="glass-card" style="grid-column: span 2;">
+        <span class="card-badge">Social Sharing</span>
+        <div class="asset-viewer" style="height: 300px;">
+          <img src="./branding/social/og-image.png" alt="OpenGraph Banner">
+        </div>
+        <div class="asset-info">
+          <h3>OpenGraph Graphic (og-image)</h3>
+          <p>Landscape high-glow design card featuring the brand mark, tagline, and modular glass design. Perfect for link shares on Slack, iMessage, and Twitter.</p>
+          <div class="asset-meta">
+            <span class="meta-tag">PNG</span>
+            <span class="meta-tag">1200×630px</span>
+            <span class="meta-tag">Landscape Card</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="splash-mockup-container">
+      
+      <!-- Mobile Mockup 1 -->
+      <div class="mobile-mockup">
+        <div class="mobile-screen">
+          <img class="logo-pulse" src="./branding/icon/app-icon.png" alt="StudyFlow Icon">
+          <h2>StudyFlow</h2>
+          <p>AI PRODUCTIVITY ASSISTANT</p>
+        </div>
+      </div>
+      
+      <!-- Mobile Mockup 2 (Adaptive Splash Mock) -->
+      <div class="mobile-mockup">
+        <div class="mobile-screen" style="background: #081120;">
+          <img src="./branding/icon/app-icon-rounded.png" alt="StudyFlow Icon rounded" style="border-radius: 22%;">
+          <h2 style="font-family: 'Inter', sans-serif; font-weight: 700; color: #FFFFFF; background:none; -webkit-text-fill-color: initial;">StudyFlow</h2>
+          <div style="width:20px; height:20px; border-radius:50%; border:2px solid #3B82F6; border-top-color:transparent; animation: rotate-aurora 1s infinite linear; margin-top:20px;"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <p>StudyFlow Branding Guide & Visual Assets — Created with ❤️ for Next-Gen Student Productivity</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+:root {
+  --background: #081120;
+  --foreground: #ffffff;
+  
+  --bg-main: #081120;
+  --bg-secondary: #111827;
+  --bg-card: rgba(20, 30, 48, 0.72);
+  --bg-frosted-border: rgba(255, 255, 255, 0.08);
+
+  --status-done: #22C55E;
+  --status-missed: #EF4444;
+  --status-partial: #F59E0B;
+  --status-today: #3B82F6;
+}
+
+@theme {
+  --color-primary: #3B82F6;
+  --color-secondary: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-bg-main: var(--bg-main);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-frosted-border: var(--bg-frosted-border);
+
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --animate-pulse-red: pulse-red 2s infinite;
+  --animate-pulse-border: pulse-border 2s ease-in-out infinite;
+  --animate-glow-border: glow-border 2s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+  }
+  @keyframes pulse-border {
+    0%, 100% { border-color: rgba(6, 182, 212, 0.3); }
+    50% { border-color: rgba(6, 182, 212, 0.6); }
+  }
+  @keyframes glow-border {
+    0%, 100% { box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.2); }
+    50% { box-shadow: inset 0 0 40px rgba(6, 182, 212, 0.4); }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Styles */
+.glass-card {
+  background: rgba(20, 30, 48, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-nav {
+  background: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-modal {
+  background: rgba(20, 30, 48, 0.85);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom transitions and scrollbar */
+.smooth-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Micro-Interactions CSS */
+.magnetic-button {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.magnetic-button:hover {
+  transform: scale(1.05);
+}
+
+.magnetic-button:active {
+  transform: scale(0.95);
+}
+
+/* Subtle Hover Blur */
+.hover-blur {
+  transition: filter 0.3s ease;
+}
+
+.hover-blur:hover {
+  filter: brightness(1.1) blur(0.5px);
+}
