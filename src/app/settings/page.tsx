@@ -304,7 +304,7 @@ export default function SettingsPage() {
                   <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-white">StudyFlow is installed</h4>
-                    <p className="text-[10px] text-white/40 mt-0.5">You&apos;re using the installed app</p>
+                    <p className="text-[10px] text-white/40 mt-0.5">You&apos;re using the installed app version</p>
                   </div>
                   <span className="ml-auto text-[9px] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 px-2.5 py-1 rounded-full uppercase tracking-wider whitespace-nowrap">
                     ✓ Installed
@@ -313,7 +313,7 @@ export default function SettingsPage() {
 
                 <div className="border-t border-white/5 pt-3">
                   <p className="text-[10px] text-white/40 mb-2 leading-relaxed">
-                    Want to add a direct launcher to your computer&apos;s desktop?
+                    Want to add a direct launcher shortcut to your desktop?
                   </p>
                   <button
                     type="button"
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                     className="w-full h-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-extrabold text-[11px] tracking-wider uppercase rounded-xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer shadow-lg"
                   >
                     <Download className="h-4 w-4 stroke-[2.5]" />
-                    Download Desktop Shortcut
+                    Download Web Shortcut File
                   </button>
                 </div>
               </div>
@@ -329,9 +329,9 @@ export default function SettingsPage() {
               /* Not installed / Installable options */
               <div className="flex flex-col gap-3.5">
                 <div>
-                  <h4 className="text-xs font-bold text-white">Install StudyFlow on your device</h4>
+                  <h4 className="text-xs font-bold text-white">Download & Install StudyFlow App</h4>
                   <p className="text-[10px] text-white/40 mt-1 leading-relaxed">
-                    Gain quick access from your home screen, support offline use, and enjoy automated task updates.
+                    StudyFlow is a progressive web app. Instead of a heavy installer file, you can install it instantly through your browser as a lightweight standalone application.
                   </p>
                 </div>
 
@@ -360,17 +360,22 @@ export default function SettingsPage() {
                     ) : (
                       <Smartphone className="h-4 w-4 stroke-[2.5]" />
                     )}
-                    {isInstallable ? "Install Web App" : "PWA Installer Guide"}
+                    {isInstallable ? "Install App Directly" : "How to Install App (Guide)"}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={downloadDesktopShortcut}
-                    className="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-extrabold text-xs tracking-wider uppercase rounded-2xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer shadow-md"
-                  >
-                    <Download className="h-4 w-4 stroke-[2.5]" />
-                    Download Desktop Shortcut
-                  </button>
+                  <div className="border-t border-white/5 pt-3 mt-1">
+                    <p className="text-[10px] text-white/40 mb-2 leading-relaxed">
+                      Alternative: Download a desktop shortcut launcher instead:
+                    </p>
+                    <button
+                      type="button"
+                      onClick={downloadDesktopShortcut}
+                      className="w-full h-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-extrabold text-[11px] tracking-wider uppercase rounded-xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                    >
+                      <Download className="h-4 w-4 stroke-[2.5]" />
+                      Download Web Shortcut File
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
