@@ -319,59 +319,33 @@ export default function LoginPage() {
       <div className="w-full max-w-md z-10 flex flex-col">
         {/* PWA Download Banner Alert */}
         <div className="mb-6 w-full animate-in fade-in slide-in-from-top-4 duration-500">
-          {canInstall ? (
-            <div 
-              onClick={handleInstall}
-              className="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/5 to-transparent border border-emerald-500/25 hover:border-emerald-500/40 hover:bg-emerald-500/20 transition-all duration-300 cursor-pointer shadow-lg shadow-emerald-950/20 backdrop-blur-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative flex h-2.5 w-2.5 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                </div>
-                <div className="flex items-center gap-2 text-left">
-                  <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
-                      StudyFlow App is Available!
-                    </p>
-                    <p className="text-[10px] text-white/50 mt-0.5">
-                      Click to install on this device instantly
-                    </p>
-                  </div>
-                </div>
+          <div 
+            onClick={canInstall ? handleInstall : () => setShowInstallerGuide(true)}
+            className="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/5 to-transparent border border-emerald-500/25 hover:border-emerald-500/40 hover:bg-emerald-500/20 transition-all duration-300 cursor-pointer shadow-lg shadow-emerald-950/20 backdrop-blur-sm"
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </div>
-              
-              <div className="flex items-center gap-1 text-[11px] font-bold text-[#00D4AA] group-hover:translate-x-0.5 transition-transform shrink-0">
-                <span>{installingApp ? "Installing..." : "Install App"}</span>
-                <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
+              <div className="flex items-center gap-2 text-left">
+                <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">
+                    StudyFlow App is Available!
+                  </p>
+                  <p className="text-[10px] text-white/50 mt-0.5">
+                    {canInstall ? "Click to install on this device instantly" : "Click to view mobile & desktop install guide"}
+                  </p>
+                </div>
               </div>
             </div>
-          ) : (
-            <div 
-              onClick={() => setShowInstallerGuide(true)}
-              className="group relative flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-300 cursor-pointer shadow-lg backdrop-blur-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-left">
-                  <Smartphone className="h-4 w-4 text-white/40 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-white/60">
-                      Already installed or use browser menu
-                    </p>
-                    <p className="text-[10px] text-white/30 mt-0.5">
-                      Tap here to open the step-by-step install guide
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-1 text-[11px] font-bold text-white/40 group-hover:translate-x-0.5 transition-transform shrink-0">
-                <span>Install Guide</span>
-                <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
-              </div>
+            
+            <div className="flex items-center gap-1 text-[11px] font-bold text-[#00D4AA] group-hover:translate-x-0.5 transition-transform shrink-0">
+              <span>{canInstall ? (installingApp ? "Installing..." : "Install App") : "Install Guide"}</span>
+              <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
             </div>
-          )}
+          </div>
         </div>
 
         {/* Brand header */}
