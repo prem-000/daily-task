@@ -13,7 +13,7 @@ import { useAuth } from "@/components/ui/auth-provider";
 export default function RegisterPage() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
 
   // "Already logged in" guard (replaces middleware.ts disabled for static export)
@@ -126,6 +126,9 @@ export default function RegisterPage() {
 
       showToast("Account successfully created!", "success");
       
+      // Refresh auth provider state to sync with newly set HTTP-only cookie
+      await refreshUser();
+
       // Delay redirect slightly for better UX experience
       setTimeout(() => {
         router.push("/dashboard");

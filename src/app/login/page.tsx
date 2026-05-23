@@ -18,6 +18,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { showToast } = useToast();
   const supabase = createClient();
+  const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -107,6 +108,9 @@ function LoginForm() {
 
       showToast("Signed in successfully!", "success");
       setIsRedirecting(true);
+
+      // Refresh auth provider state to sync with newly set HTTP-only cookie
+      await refreshUser();
 
       // Redirect either to callbackUrl (e.g. from middleware) or default to /dashboard
       const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
