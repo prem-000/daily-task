@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { RegisterSchema } from "@/lib/validation";
 import { hashPassword } from "@/lib/hash";
-import { signJWT, setAuthCookie } from "@/lib/auth";
+import { signJWT, setResponseAuthCookie } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase-server";
 
@@ -108,10 +108,10 @@ export async function POST(request: NextRequest) {
     };
 
     const token = await signJWT(sessionPayload, false);
-    await setAuthCookie(token, false);
 
-    // 7. Return success without exposing the password hash
-    return NextResponse.json({
+    // 7. Build success response and set auth cookie on the response object
+    // (response.cookies works with force-static; next/headers cookies().set() does not)
+    const response = NextResponse.json({
       success: true,
       message: "Account created successfully",
       user: {
@@ -122,6 +122,8 @@ export async function POST(request: NextRequest) {
         profileImage: user.profileImage,
       }
     }, { status: 201 });
+    setResponseAuthCookie(response, token, false);
+    return response;
 
   } catch (error) {
     console.error("Registration error:", error);

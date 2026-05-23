@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "studyflow_super_secret_fallback_key_32_chars_long_minimum!"
@@ -62,6 +62,40 @@ export async function setAuthCookie(token: string, rememberMe: boolean) {
 export async function clearAuthCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
+}
+
+/**
+ * Sets the session JWT cookie directly on a NextResponse object.
+ * Use this in Route Handlers that have `export const dynamic = "force-static"`,
+ * since next/headers cookies().set() is blocked in force-static mode.
+ */
+export function setResponseAuthCookie(
+  response: NextResponse,
+  token: string,
+  rememberMe: boolean
+) {
+  const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60;
+  response.cookies.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge,
+  });
+}
+
+/**
+ * Clears the session JWT cookie directly on a NextResponse object.
+ * Use this in Route Handlers that have `export const dynamic = "force-static"`.
+ */
+export function clearResponseAuthCookie(response: NextResponse) {
+  response.cookies.set(COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
 }
 
 /**

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { LoginSchema } from "@/lib/validation";
 import { comparePassword } from "@/lib/hash";
-import { signJWT, setAuthCookie } from "@/lib/auth";
+import { signJWT, setResponseAuthCookie } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase-server";
 
@@ -93,10 +93,10 @@ export async function POST(request: NextRequest) {
     };
 
     const token = await signJWT(sessionPayload, rememberMe);
-    await setAuthCookie(token, rememberMe);
 
-    // 6. Return success
-    return NextResponse.json({
+    // 6. Build success response and set auth cookie on the response object
+    // (response.cookies works with force-static; next/headers cookies().set() does not)
+    const response = NextResponse.json({
       success: true,
       message: "Login successful",
       user: {
@@ -107,6 +107,8 @@ export async function POST(request: NextRequest) {
         profileImage: user.profileImage,
       }
     });
+    setResponseAuthCookie(response, token, rememberMe);
+    return response;
 
   } catch (error) {
     console.error("Login API error:", error);
