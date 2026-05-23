@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, User, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
@@ -8,11 +8,20 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
 import { PasswordStrength } from "@/components/ui/password-strength";
 import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/components/ui/auth-provider";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  // "Already logged in" guard (replaces middleware.ts disabled for static export)
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
   
   const [formData, setFormData] = useState({
     fullName: "",

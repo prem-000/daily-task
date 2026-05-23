@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { User, Shield, KeyRound, ArrowLeft, Save, Loader2 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,15 @@ import { useToast } from "@/components/ui/toast";
 export default function ProfilePage() {
   const { user, loading, refreshUser } = useAuth();
   const { showToast } = useToast();
+  const router = useRouter();
   const [updating, setUpdating] = useState(false);
+
+  // Client-side auth guard (replaces middleware.ts disabled for static export)
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   const [formData, setFormData] = useState({
     fullName: "",

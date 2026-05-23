@@ -11,6 +11,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase";
+import { useAuth } from "@/components/ui/auth-provider";
 
 function LoginForm() {
   const router = useRouter();
@@ -241,9 +242,18 @@ function LoginFormFallback() {
 
 export default function LoginPage() {
   const { showToast } = useToast();
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [showInstallerGuide, setShowInstallerGuide] = useState(false);
   const [installerTab, setInstallerTab] = useState<"ios" | "android" | "desktop">("ios");
   const [installingApp, setInstallingApp] = useState(false);
+
+  // "Already logged in" guard (replaces middleware.ts disabled for static export)
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   // PWA Native Installer States
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);

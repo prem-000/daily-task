@@ -7,7 +7,7 @@ import { useAuth } from "@/components/ui/auth-provider";
 import { useToast } from "@/components/ui/toast";
 import { 
   Bell, Palette, LogOut, Check, Loader2, Save, Moon, Sun, Info, Smartphone, CheckCircle2,
-  X, Laptop, Monitor, Sparkles, HelpCircle, ChevronRight, Apple
+  X, Laptop, Monitor, Sparkles, HelpCircle, ChevronRight, Apple, Download
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -65,21 +65,32 @@ export default function SettingsPage() {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    const promptEvent = (window as any).deferredPrompt || deferredPrompt;
+    if (!promptEvent) {
+      showToast("PWA install prompt is not available yet or the app is already installed.", "info");
+      return;
+    }
     setInstallingApp(true);
     try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+      await promptEvent.prompt();
+      const { outcome } = await promptEvent.userChoice;
       if (outcome === 'accepted') {
-        setCanInstall(false);
         showToast('App installed successfully! 🎉', 'success');
       }
-      setDeferredPrompt(null);
     } catch (err) {
       console.error('Install failed:', err);
     } finally {
       setInstallingApp(false);
     }
+  };
+
+  const handleDownloadAPK = () => {
+    const link = document.createElement("a");
+    link.href = "/studyflow.apk";
+    link.download = "studyflow.apk";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Settings states
@@ -334,46 +345,31 @@ export default function SettingsPage() {
               <Smartphone className="h-4 w-4 text-[#00D4AA]" /> App Installation
             </h3>
 
-            {canInstall ? (
-              /* Installable options */
-              <div className="flex flex-col gap-3.5 animate-in fade-in duration-200">
-                <div>
-                  <h4 className="text-xs font-bold text-white">Install StudyFlow on your device</h4>
-                  <p className="text-[10px] text-white/40 mt-1 leading-relaxed">
-                    Gain quick access from your home screen, support offline use, and enjoy automated task updates.
-                  </p>
-                </div>
+            <div className="flex flex-col gap-3">
+              {/* Green Download APK Button */}
+              <button
+                id="settings-download-apk-btn"
+                onClick={handleDownloadAPK}
+                className="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-black font-extrabold text-xs tracking-wider uppercase rounded-2xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10 animate-in fade-in duration-200"
+              >
+                <Download className="h-4 w-4 stroke-[2.5]" />
+                Download APK (Android)
+              </button>
 
-                <div className="flex flex-col gap-2.5">
-                  <button
-                    id="settings-install-btn"
-                    onClick={handleInstall}
-                    disabled={installingApp}
-                    className="w-full h-12 bg-gradient-to-r from-[#00D4AA] to-emerald-500 text-black font-extrabold text-xs tracking-wider uppercase rounded-2xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-[#00D4AA]/10"
-                  >
-                    {installingApp ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Smartphone className="h-4 w-4 stroke-[2.5]" />
-                    )}
-                    Install StudyFlow App
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Not installable / Already installed */
-              <div className="flex flex-col gap-3.5 animate-in fade-in duration-200">
-                <div className="flex items-center gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                  <div>
-                    <h4 className="text-xs font-bold text-white">Already installed or use browser menu</h4>
-                    <p className="text-[10px] text-white/40 mt-1 leading-relaxed">
-                      If StudyFlow is not yet installed on this device, you can install it using your browser's menu option (e.g., tap the three vertical dots in Chrome or the Share button in Safari, then select &ldquo;Install app&rdquo; or &ldquo;Add to Home Screen&rdquo;).
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+              {/* Outlined Install PWA Button */}
+              <button
+                id="settings-install-btn"
+                onClick={handleInstall}
+                className="w-full h-12 border border-[#00D4AA]/30 hover:border-[#00D4AA]/60 text-[#00D4AA] bg-transparent hover:bg-[#00D4AA]/5 font-extrabold text-xs tracking-wider uppercase rounded-2xl transition hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#00D4AA]/5 animate-in fade-in duration-200"
+              >
+                {installingApp ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Smartphone className="h-4 w-4 stroke-[2.5]" />
+                )}
+                Install as App (PWA)
+              </button>
+            </div>
           </div>
 
         {/* Action triggers */}

@@ -39,12 +39,13 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              window.deferredPrompt = null;
-              window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                window.deferredPrompt = e;
-                window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
-              });
+              if (typeof window !== "undefined") {
+                window.addEventListener("beforeinstallprompt", (e) => {
+                  e.preventDefault();
+                  window.deferredPrompt = e;
+                  window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
+                });
+              }
             `,
           }}
         />

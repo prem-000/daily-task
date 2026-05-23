@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createRouteClient } from "@/lib/supabase-server";
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
 IMPORTANT RULES:
 - Today is ${todayStr}. Current time (UTC) is ${nowISO}.
 - If no date is mentioned, assume today (${todayStr}).
-- If the user provides a due_date that is BEFORE today, or a due_date of today with a due_time that is already in the past, you must still extract the JSON faithfully — the app will reject it and inform the user. Do NOT silently change the date.
+- If the user provides a due_date that is BEFORE today, or a due_date of today with a due_time that is already in the past, you must still extract the JSON faithfully â€” the app will reject it and inform the user. Do NOT silently change the date.
 - If the user explicitly asks for a past date or time, extract it as-is; the app will show them an error and ask for a future date/time.
 - Prefer the user's literal words. Only infer a date when none is given.
 Return ONLY the JSON, no extra text.`;

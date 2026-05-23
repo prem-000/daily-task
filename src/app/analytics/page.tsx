@@ -2,31 +2,41 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
+import { useAuth } from '@/components/ui/auth-provider';
+import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
 import { BarChart3, TrendingUp, Award, Clock, Star } from 'lucide-react';
 import { Task } from '@/components/CalendarGrid';
 
 export default function AnalyticsPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
+  // Client-side auth guard (replaces middleware.ts disabled for static export)
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  // Fetch tasks once authenticated user is available
+  useEffect(() => {
+    if (!user) return;
     const fetchStats = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data } = await supabase
-          .from('tasks')
-          .select('*')
-          .eq('user_id', session.user.id);
-        if (data) {
-          setTasks(data as Task[]);
-        }
+      const { data } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', user.id);
+      if (data) {
+        setTasks(data as Task[]);
       }
       setLoading(false);
     };
     fetchStats();
-  }, []);
+  }, [user]);
 
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === 'done').length;

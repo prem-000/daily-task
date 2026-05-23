@@ -43,6 +43,13 @@ export default function NavigationWrapper({ children }: NavigationWrapperProps) 
     }
   };
 
+  // Client-side auth guard (replaces middleware.ts which is disabled for static export)
+  React.useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center flex-col gap-4 text-white">
@@ -53,7 +60,8 @@ export default function NavigationWrapper({ children }: NavigationWrapperProps) 
   }
 
   if (!user) {
-    return null; // Let the middleware or useEffect handle redirection
+    // Redirecting — render nothing while router.push takes effect
+    return null;
   }
 
   const tabs = [

@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendBulkNotifications } from '../../../../lib/push';
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
 
         // Send push notification
         const { sent } = await sendBulkNotifications(pushSubscriptions, {
-          title: 'Missed task ❌',
+          title: 'Missed task âŒ',
           body: `You didn't complete: "${task.title}"`,
           icon: '/icons/icon-192x192.png',
           badge: '/icons/badge-72x72.png',
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
       await supabase.from('notification_log').insert({
         user_id: task.user_id,
         task_id: task.id,
-        message: `Missed task ❌: You didn't complete: "${task.title}"`,
+        message: `Missed task âŒ: You didn't complete: "${task.title}"`,
       });
     }
 

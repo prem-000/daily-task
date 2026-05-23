@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendBulkNotifications } from '../../../../lib/push';
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest) {
         if (shouldSend) {
           // Send push notification
           const { sent } = await sendBulkNotifications(pushSubscriptions, {
-            title: '⏰ Task Reminder',
+            title: 'â° Task Reminder',
             body: `"${task.title}" is still pending!`,
             icon: '/icons/icon-192x192.png',
             badge: '/icons/badge-72x72.png',
@@ -122,7 +123,7 @@ export async function GET(request: NextRequest) {
             await supabase.from('notification_log').insert({
               user_id: userId,
               task_id: task.id,
-              message: `Task Reminder ⏰: "${task.title}" is still pending!`,
+              message: `Task Reminder â°: "${task.title}" is still pending!`,
             });
           }
         }

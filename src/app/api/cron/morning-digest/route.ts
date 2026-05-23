@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendBulkNotifications } from '../../../../lib/push';
@@ -75,10 +76,10 @@ export async function GET(request: NextRequest) {
       }));
 
       // Create a bulleted task list
-      const taskList = userTasks.map((t: any) => `• ${t.title}`).join('\n');
+      const taskList = userTasks.map((t: any) => `â€¢ ${t.title}`).join('\n');
 
       const { sent, failed } = await sendBulkNotifications(pushSubscriptions, {
-        title: '🌅 Good Morning!',
+        title: 'ðŸŒ… Good Morning!',
         body: `You have ${userTasks.length} task(s) due today:\n${taskList}`,
         icon: '/icons/icon-192x192.png',
         badge: '/icons/badge-72x72.png',
