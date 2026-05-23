@@ -1,4 +1,4 @@
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 import { createRouteClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 

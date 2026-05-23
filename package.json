@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:capacitor": "cross-env CAPACITOR_BUILD=true next build",
+    "build:capacitor": "node build-capacitor.js",
     "start": "next start",
     "lint": "eslint",
     "cap:build": "npm run build:capacitor",
