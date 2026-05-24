@@ -1,13 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.studyflow.app',
+  appId: 'com.premsai.aiassistant',
   appName: 'StudyFlow',
   webDir: 'out',
   server: {
-    // If wrapping a live web app url, uncomment and set the live URL:
-    // url: 'https://studyflow.vercel.app',
-    // cleartext: true,
+    url: 'https://studyflow.vercel.app',
+    cleartext: true,
   },
   android: {
     allowMixedContent: true,
@@ -19,8 +18,8 @@ const config: CapacitorConfig = {
       launchShowDuration: 2000,
       backgroundColor: '#0a0f1e',
       showSpinner: false,
-    }
-  }
+    },
+  },
 };
 
 export default config;
