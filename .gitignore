@@ -47,3 +47,5 @@ next-env.d.ts
 # local dev artifacts
 temp-next/
 .vscode/
+
+.vercel

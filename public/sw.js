@@ -9,8 +9,8 @@ const STATIC_ASSETS = [
   '/settings',
   '/analytics',
   '/offline.html',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
 // Install event - cache static assets
@@ -82,8 +82,8 @@ self.addEventListener('push', (event) => {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: data.icon || '/icons/icon-192x192.png',
-      badge: data.badge || '/icons/badge-72x72.png',
+      icon: data.icon || '/icon-192.png',
+      badge: data.badge || '/icon-192.png',
       vibrate: [200, 100, 200],
       data: data.data || {},
       actions: [

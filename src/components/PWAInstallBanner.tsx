@@ -104,7 +104,7 @@ export default function PWAInstallBanner() {
                 }}
               >
                 <img
-                  src="/icons/icon-192x192.png"
+                  src="/icon-192.png"
                   alt="StudyFlow"
                   style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 8 }}
                 />
