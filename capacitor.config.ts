@@ -3,7 +3,6 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.premsai.aiassistant',
   appName: 'StudyFlow',
-  webDir: 'out',
   server: {
     url: 'https://studyflow.vercel.app',
     cleartext: true,
